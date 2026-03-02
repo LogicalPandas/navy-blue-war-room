@@ -9,7 +9,7 @@ import {
     deleteDoc
 } from 'firebase/firestore';
 
-const TOTAL_VOTERS = 100; // Customizable total body size
+const TOTAL_VOTERS = 29; // Hardcoded total body size
 
 const STATUS_OPTIONS = [
     'Pre-Comm',
@@ -23,7 +23,10 @@ function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');
     const [bills, setBills] = useState([]);
-    const [totalVoters, setTotalVoters] = useState(TOTAL_VOTERS);
+
+    // Filters
+    const [filterPhase, setFilterPhase] = useState('All');
+    const [filterParty, setFilterParty] = useState('All');
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -171,7 +174,7 @@ function App() {
                 </div>
             </header>
 
-            <div className="dashboard-controls">
+            <div className="dashboard-controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <button className="add-bill-btn" onClick={() => setIsModalOpen(true)}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -179,114 +182,147 @@ function App() {
                     </svg>
                     Add New Bill
                 </button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <label style={{ fontSize: '14px', fontWeight: '500' }}>Total Chamber Members:</label>
-                    <input
-                        type="number"
-                        className="input-control"
-                        style={{ width: '80px' }}
-                        value={totalVoters}
-                        onChange={(e) => setTotalVoters(Number(e.target.value))}
-                    />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <label style={{ fontSize: '14px', fontWeight: '500', color: 'var(--slate)' }}>Party:</label>
+                        <select
+                            className="input-control"
+                            style={{ width: 'auto', padding: '6px 10px' }}
+                            value={filterParty}
+                            onChange={e => setFilterParty(e.target.value)}
+                        >
+                            <option value="All">All Parties</option>
+                            <option value="Navy Blue">Navy Blue</option>
+                            <option value="Royal Blue">Royal Blue</option>
+                        </select>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <label style={{ fontSize: '14px', fontWeight: '500', color: 'var(--slate)' }}>Phase:</label>
+                        <select
+                            className="input-control"
+                            style={{ width: 'auto', padding: '6px 10px' }}
+                            value={filterPhase}
+                            onChange={e => setFilterPhase(e.target.value)}
+                        >
+                            <option value="All">All Phases</option>
+                            {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                    </div>
                 </div>
             </div>
 
             <div className="bills-grid">
-                {bills.map(bill => {
-                    const isVetoWarning = !bill.isNavyBlue && !bill.isAgendaAligned && bill.status === 'Passed Comm';
-                    const totalVotesCast = bill.votesYes + bill.votesNo + bill.votesUndecided;
-                    const requiredFraction = bill.isSupermajority ? 0.66 : 0.51;
-                    const requiredVotes = Math.ceil(totalVoters * requiredFraction);
-                    const hasMajority = bill.votesYes >= requiredVotes;
+                {bills
+                    .filter(bill => {
+                        if (filterPhase !== 'All' && bill.status !== filterPhase) return false;
+                        if (filterParty === 'Navy Blue' && !bill.isNavyBlue) return false;
+                        if (filterParty === 'Royal Blue' && bill.isNavyBlue) return false;
+                        return true;
+                    })
+                    .map(bill => {
+                        const isVetoWarning = !bill.isNavyBlue && !bill.isAgendaAligned && bill.status === 'Passed Comm';
+                        const totalVotesCast = bill.votesYes + bill.votesNo + bill.votesUndecided;
+                        const requiredFraction = bill.isSupermajority ? 0.66 : 0.51;
+                        const requiredVotes = Math.ceil(TOTAL_VOTERS * requiredFraction);
+                        const hasMajority = bill.votesYes >= requiredVotes;
 
-                    return (
-                        <div key={bill._firestoreId} className={`bill-card ${isVetoWarning ? 'veto-warning' : ''}`}>
-                            {isVetoWarning && (
-                                <div className="veto-banner">
-                                    🚨 STOP THIS BILL 🚨
-                                </div>
-                            )}
+                        return (
+                            <div key={bill._firestoreId} className={`bill-card ${isVetoWarning ? 'veto-warning' : ''}`}>
+                                {isVetoWarning && (
+                                    <div className="veto-banner">
+                                        🚨 STOP THIS BILL 🚨
+                                    </div>
+                                )}
 
-                            <div className="card-header">
-                                <h3 style={{ margin: '0' }}>{bill.id}</h3>
-                                <button
-                                    onClick={() => handleDeleteBill(bill._firestoreId)}
-                                    style={{ background: 'none', border: 'none', color: 'var(--slate)', cursor: 'pointer', padding: '0' }}
-                                    title="Delete Bill"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                </button>
-                            </div>
-
-                            <div>
-                                <div style={{ fontWeight: '600', color: 'var(--white)', marginBottom: '5px' }}>{bill.title}</div>
-                                <div style={{ fontSize: '13px', color: 'var(--slate)' }}>By {bill.author}</div>
-                            </div>
-
-                            <div className="bill-badges">
-                                <span className={`badge ${bill.isNavyBlue ? 'badge-navy' : 'badge-royal'}`}>
-                                    {bill.isNavyBlue ? 'Navy Blue' : 'Royal Blue'}
-                                </span>
-                                {bill.isAgendaAligned && <span className="badge badge-agenda">Agenda Aligned (+2)</span>}
-                                {bill.isSupermajority && <span className="badge badge-super">Supermajority (66%)</span>}
-                            </div>
-
-                            <div className="attribute-row">
-                                <span style={{ color: 'var(--slate)' }}>Status:</span>
-                                <select
-                                    value={bill.status}
-                                    onChange={(e) => handleUpdateBill(bill._firestoreId, 'status', e.target.value)}
-                                >
-                                    {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                                </select>
-                            </div>
-
-                            <div className="whip-tools">
-                                <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--slate)', fontWeight: '600', marginBottom: '5px' }}>
-                                    Whip Tallies
+                                <div className="card-header">
+                                    <h3 style={{ margin: '0' }}>{bill.id}</h3>
+                                    <button
+                                        onClick={() => handleDeleteBill(bill._firestoreId)}
+                                        style={{ background: 'none', border: 'none', color: 'var(--slate)', cursor: 'pointer', padding: '0' }}
+                                        title="Delete Bill"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </button>
                                 </div>
 
-                                <div className="vote-row">
-                                    <span className="vote-label" style={{ color: 'var(--success-green)' }}>YES</span>
-                                    <div className="vote-controls">
-                                        <button className="vote-btn" onClick={() => adjustVote(bill._firestoreId, bill.votesYes, 'votesYes', -1)}>-</button>
-                                        <span className="vote-count">{bill.votesYes}</span>
-                                        <button className="vote-btn" onClick={() => adjustVote(bill._firestoreId, bill.votesYes, 'votesYes', 1)}>+</button>
+                                <div>
+                                    <div style={{ fontWeight: '600', color: 'var(--white)', marginBottom: '5px' }}>{bill.title}</div>
+                                    <div style={{ fontSize: '13px', color: 'var(--slate)' }}>By {bill.author}</div>
+                                </div>
+
+                                <div className="bill-badges">
+                                    <span className={`badge ${bill.isNavyBlue ? 'badge-navy' : 'badge-royal'}`}>
+                                        {bill.isNavyBlue ? 'Navy Blue' : 'Royal Blue'}
+                                    </span>
+                                    {bill.isAgendaAligned && <span className="badge badge-agenda">Agenda Aligned (+2)</span>}
+                                    {bill.isSupermajority && <span className="badge badge-super">Supermajority (66%)</span>}
+                                </div>
+
+                                <div className="attribute-row">
+                                    <span style={{ color: 'var(--slate)' }}>Status:</span>
+                                    <select
+                                        value={bill.status}
+                                        onChange={(e) => handleUpdateBill(bill._firestoreId, 'status', e.target.value)}
+                                    >
+                                        {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                    </select>
+                                </div>
+
+                                <div className="whip-tools">
+                                    <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--slate)', fontWeight: '600', marginBottom: '5px' }}>
+                                        Whip Tallies
+                                    </div>
+
+                                    <div className="vote-row">
+                                        <span className="vote-label" style={{ color: 'var(--success-green)' }}>YES</span>
+                                        <div className="vote-controls">
+                                            <button className="vote-btn" onClick={() => adjustVote(bill._firestoreId, bill.votesYes, 'votesYes', -1)}>-</button>
+                                            <span className="vote-count">{bill.votesYes}</span>
+                                            <button className="vote-btn" onClick={() => adjustVote(bill._firestoreId, bill.votesYes, 'votesYes', 1)}>+</button>
+                                        </div>
+                                    </div>
+
+                                    <div className="vote-row">
+                                        <span className="vote-label" style={{ color: 'var(--slate-light)' }}>UNDECIDED</span>
+                                        <div className="vote-controls">
+                                            <button className="vote-btn" onClick={() => adjustVote(bill._firestoreId, bill.votesUndecided, 'votesUndecided', -1)}>-</button>
+                                            <span className="vote-count">{bill.votesUndecided}</span>
+                                            <button className="vote-btn" onClick={() => adjustVote(bill._firestoreId, bill.votesUndecided, 'votesUndecided', 1)}>+</button>
+                                        </div>
+                                    </div>
+
+                                    <div className="vote-row">
+                                        <span className="vote-label" style={{ color: 'var(--warning-red)' }}>NO</span>
+                                        <div className="vote-controls">
+                                            <button className="vote-btn" onClick={() => adjustVote(bill._firestoreId, bill.votesNo, 'votesNo', -1)}>-</button>
+                                            <span className="vote-count">{bill.votesNo}</span>
+                                            <button className="vote-btn" onClick={() => adjustVote(bill._firestoreId, bill.votesNo, 'votesNo', 1)}>+</button>
+                                        </div>
+                                    </div>
+
+                                    <div className={`majority-indicator ${hasMajority ? 'majority-met' : ''}`} style={{ marginTop: '10px' }}>
+                                        {hasMajority
+                                            ? `✓ Majority Secured (${bill.votesYes}/${requiredVotes})`
+                                            : `Needs ${requiredVotes - bill.votesYes} more YES votes`}
                                     </div>
                                 </div>
-
-                                <div className="vote-row">
-                                    <span className="vote-label" style={{ color: 'var(--slate-light)' }}>UNDECIDED</span>
-                                    <div className="vote-controls">
-                                        <button className="vote-btn" onClick={() => adjustVote(bill._firestoreId, bill.votesUndecided, 'votesUndecided', -1)}>-</button>
-                                        <span className="vote-count">{bill.votesUndecided}</span>
-                                        <button className="vote-btn" onClick={() => adjustVote(bill._firestoreId, bill.votesUndecided, 'votesUndecided', 1)}>+</button>
-                                    </div>
-                                </div>
-
-                                <div className="vote-row">
-                                    <span className="vote-label" style={{ color: 'var(--warning-red)' }}>NO</span>
-                                    <div className="vote-controls">
-                                        <button className="vote-btn" onClick={() => adjustVote(bill._firestoreId, bill.votesNo, 'votesNo', -1)}>-</button>
-                                        <span className="vote-count">{bill.votesNo}</span>
-                                        <button className="vote-btn" onClick={() => adjustVote(bill._firestoreId, bill.votesNo, 'votesNo', 1)}>+</button>
-                                    </div>
-                                </div>
-
-                                <div className={`majority-indicator ${hasMajority ? 'majority-met' : ''}`} style={{ marginTop: '10px' }}>
-                                    {hasMajority
-                                        ? `✓ Majority Secured (${bill.votesYes}/${requiredVotes})`
-                                        : `Needs ${requiredVotes - bill.votesYes} more YES votes`}
-                                </div>
                             </div>
-                        </div>
-                    );
-                })}
-                {bills.length === 0 && (
+                        );
+                    })}
+                {bills.length === 0 ? (
                     <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--slate)', backgroundColor: 'var(--navy-blue)', borderRadius: '12px' }}>
                         No bills found. Add a new bill to start.
                     </div>
-                )}
+                ) : bills.filter(bill => {
+                    if (filterPhase !== 'All' && bill.status !== filterPhase) return false;
+                    if (filterParty === 'Navy Blue' && !bill.isNavyBlue) return false;
+                    if (filterParty === 'Royal Blue' && bill.isNavyBlue) return false;
+                    return true;
+                }).length === 0 ? (
+                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--slate)', backgroundColor: 'var(--navy-blue)', borderRadius: '12px' }}>
+                        No bills match your filters.
+                    </div>
+                ) : null}
             </div>
 
             {isModalOpen && (
