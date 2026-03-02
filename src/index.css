@@ -1,0 +1,343 @@
+:root {
+  --navy-dark: #061121;
+  --navy-blue: #0A192F;
+  --navy-light: #112240;
+  --navy-lighter: #233554;
+  --slate: #8892b0;
+  --slate-light: #a8b2d1;
+  --white: #e6f1ff;
+  --accent-blue: #64ffda;
+  --warning-red: #ff3b30;
+  --warning-dark: #3a0d0b;
+  --success-green: #34c759;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  background-color: var(--navy-dark);
+  color: var(--slate-light);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--white);
+  margin: 0 0 10px 0;
+}
+
+.password-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--navy-dark);
+}
+
+.password-card {
+  background-color: var(--navy-blue);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+  text-align: center;
+  border: 1px solid var(--navy-lighter);
+}
+
+.password-input {
+  background-color: var(--navy-light);
+  border: 1px solid var(--navy-lighter);
+  color: var(--white);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+  width: 100%;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.password-input:focus {
+  border-color: var(--accent-blue);
+}
+
+.btn-primary {
+  background-color: transparent;
+  color: var(--accent-blue);
+  border: 1px solid var(--accent-blue);
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: rgba(100, 255, 218, 0.1);
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--navy-lighter);
+  margin-bottom: 30px;
+}
+
+.score-board {
+  background-color: var(--navy-blue);
+  border: 1px solid var(--navy-lighter);
+  padding: 15px 25px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.score-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent-blue);
+}
+
+.dashboard-controls {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.input-control {
+  background-color: var(--navy-light);
+  border: 1px solid var(--navy-lighter);
+  color: var(--white);
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.bills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.bill-card {
+  background-color: var(--navy-blue);
+  border: 1px solid var(--navy-lighter);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.bill-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -15px rgba(0,0,0,0.5);
+}
+
+.bill-card.veto-warning {
+  border-color: var(--warning-red);
+  background-color: var(--warning-dark);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.bill-badges {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-navy { background-color: rgba(100, 255, 218, 0.1); color: var(--accent-blue); border: 1px solid rgba(100,255,218,0.2); }
+.badge-royal { background-color: rgba(255, 59, 48, 0.1); color: var(--warning-red); border: 1px solid rgba(255,59,48,0.2); }
+.badge-agenda { background-color: rgba(52, 199, 89, 0.1); color: var(--success-green); border: 1px solid rgba(52,199,89,0.2); }
+.badge-super { background-color: rgba(168, 178, 209, 0.1); color: var(--slate-light); border: 1px solid rgba(168,178,209,0.2); }
+
+.veto-banner {
+  background-color: var(--warning-red);
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.attribute-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+select {
+  background-color: var(--navy-light);
+  color: var(--white);
+  border: 1px solid var(--navy-lighter);
+  padding: 8px;
+  border-radius: 6px;
+  width: 100%;
+  outline: none;
+}
+
+select:focus {
+  border-color: var(--accent-blue);
+}
+
+.whip-tools {
+  background-color: var(--navy-light);
+  padding: 15px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vote-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vote-label {
+  font-weight: 500;
+  width: 80px;
+}
+
+.vote-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.vote-btn {
+  background-color: var(--navy-lighter);
+  color: var(--white);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  transition: background-color 0.2s;
+}
+
+.vote-btn:hover {
+  background-color: var(--slate);
+}
+
+.vote-count {
+  font-weight: 700;
+  color: var(--white);
+  width: 30px;
+  text-align: center;
+}
+
+.majority-indicator {
+  text-align: center;
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  background-color: var(--navy-lighter);
+  color: var(--slate-light);
+  transition: all 0.3s ease;
+}
+
+.majority-met {
+  background-color: rgba(52, 199, 89, 0.2);
+  color: var(--success-green);
+  border: 1px solid rgba(52, 199, 89, 0.3);
+}
+
+.add-bill-btn {
+  background-color: var(--accent-blue);
+  color: var(--navy-dark);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s;
+}
+
+.add-bill-btn:hover {
+  opacity: 0.9;
+}
+
+/* Modal styles for adding new bills */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(6, 17, 33, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--navy-blue);
+  padding: 30px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  border: 1px solid var(--navy-lighter);
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 25px;
+}
