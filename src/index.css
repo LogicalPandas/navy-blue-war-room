@@ -179,6 +179,11 @@ h6 {
   box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.5);
 }
 
+.bill-card.royal-blue-card {
+  background-color: rgba(255, 59, 48, 0.1);
+  border-color: rgba(255, 59, 48, 0.4);
+}
+
 .bill-card.veto-warning {
   border-color: var(--warning-red);
   background-color: var(--warning-dark);

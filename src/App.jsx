@@ -99,6 +99,7 @@ function App() {
     // Calculate Dashboard Metrics
     const validNavyBills = bills.filter(b => b.isNavyBlue && b.status !== 'Killed in Committee');
     const totalNavyBillsAlive = validNavyBills.length;
+    const totalNavyBillsPassed = bills.filter(b => b.isNavyBlue && b.status === 'Passed House').length;
 
     const navyBillsByCommittee = validNavyBills.reduce((acc, bill) => {
         const comm = bill.committee || 'Unassigned';
@@ -200,6 +201,10 @@ function App() {
                         <div className="metric-title">Navy Bills Alive</div>
                         <div className="metric-value" style={{ color: 'var(--accent-blue)' }}>{totalNavyBillsAlive}</div>
                     </div>
+                    <div className="metric-card">
+                        <div className="metric-title">Navy Passed House</div>
+                        <div className="metric-value" style={{ color: 'var(--success-green)' }}>{totalNavyBillsPassed}</div>
+                    </div>
                     {COMMITTEE_OPTIONS.map(comm => (
                         <div key={comm} className="metric-card">
                             <div className="metric-title" title={comm}>
@@ -265,7 +270,7 @@ function App() {
                         const hasMajority = bill.votesYes >= requiredVotes;
 
                         return (
-                            <div key={bill._firestoreId} className={`bill-card ${isVetoWarning ? 'veto-warning' : ''}`}>
+                            <div key={bill._firestoreId} className={`bill-card ${!bill.isNavyBlue ? 'royal-blue-card' : ''} ${isVetoWarning ? 'veto-warning' : ''}`}>
                                 {isVetoWarning && (
                                     <div className="veto-banner">
                                         🚨 STOP THIS BILL 🚨
