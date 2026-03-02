@@ -13,9 +13,9 @@ const TOTAL_VOTERS = 29; // Hardcoded total body size
 
 const STATUS_OPTIONS = [
     'Pre-Comm',
-    'Killed Pre-Comm',
-    'Killed In Comm',
-    'Passed Comm',
+    'In Committee',
+    'Killed in Committee',
+    'In House',
     'Passed House',
 ];
 
@@ -42,7 +42,7 @@ function App() {
         id: '',
         title: '',
         author: '',
-        committee: COMMITTEE_OPTIONS[0],
+        committee: '', // Blank initially until assigned
         isNavyBlue: true,
         isAgendaAligned: true,
         isSupermajority: false,
@@ -97,7 +97,7 @@ function App() {
     };
 
     // Calculate Dashboard Metrics
-    const validNavyBills = bills.filter(b => b.isNavyBlue && b.status !== 'Killed Pre-Comm' && b.status !== 'Killed In Comm');
+    const validNavyBills = bills.filter(b => b.isNavyBlue && b.status !== 'Killed in Committee');
     const totalNavyBillsAlive = validNavyBills.length;
 
     const navyBillsByCommittee = validNavyBills.reduce((acc, bill) => {
@@ -131,7 +131,7 @@ function App() {
             setIsModalOpen(false);
             // Reset form
             setNewBill({
-                id: '', title: '', author: '', committee: COMMITTEE_OPTIONS[0], isNavyBlue: true, isAgendaAligned: true,
+                id: '', title: '', author: '', committee: '', isNavyBlue: true, isAgendaAligned: true,
                 isSupermajority: false, status: 'Pre-Comm', votesYes: 0, votesUndecided: 0, votesNo: 0
             });
         } catch (error) {
@@ -258,7 +258,7 @@ function App() {
                         return true;
                     })
                     .map(bill => {
-                        const isVetoWarning = !bill.isNavyBlue && !bill.isAgendaAligned && bill.status === 'Passed Comm';
+                        const isVetoWarning = !bill.isNavyBlue && !bill.isAgendaAligned && (bill.status === 'In Committee' || bill.status === 'In House');
                         const totalVotesCast = bill.votesYes + bill.votesNo + bill.votesUndecided;
                         const requiredFraction = bill.isSupermajority ? 0.66 : 0.51;
                         const requiredVotes = Math.ceil(TOTAL_VOTERS * requiredFraction);
@@ -279,16 +279,27 @@ function App() {
                                         style={{ background: 'none', border: 'none', color: 'var(--slate)', cursor: 'pointer', padding: '0' }}
                                         title="Delete Bill"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 0 0 1-2-2V6m3 0V4a2 0 0 1 2-2h4a2 0 0 1 2 2v2"></path></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                     </button>
                                 </div>
 
                                 <div>
                                     <div style={{ fontWeight: '600', color: 'var(--white)', marginBottom: '5px' }}>{bill.title}</div>
                                     <div style={{ fontSize: '13px', color: 'var(--slate)' }}>By {bill.author}</div>
-                                    <div style={{ fontSize: '12px', color: 'var(--slate-light)', marginTop: '4px', fontStyle: 'italic' }}>
-                                        {bill.committee || 'Unassigned'}
-                                    </div>
+                                    {bill.status === 'In Committee' || bill.status === 'Killed in Committee' ? (
+                                        <select
+                                            style={{ backgroundColor: 'transparent', border: '1px solid var(--navy-lighter)', color: 'var(--slate-light)', fontSize: '12px', padding: '2px 4px', marginTop: '4px', width: '100%' }}
+                                            value={bill.committee || ''}
+                                            onChange={(e) => handleUpdateBill(bill._firestoreId, 'committee', e.target.value)}
+                                        >
+                                            <option value="" disabled>Select Committee...</option>
+                                            {COMMITTEE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                        </select>
+                                    ) : (
+                                        <div style={{ fontSize: '12px', color: 'var(--slate-light)', marginTop: '4px', fontStyle: 'italic' }}>
+                                            {(bill.status === 'In House' || bill.status === 'Passed House') ? '' : (bill.committee || 'Pending Committee')}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="bill-badges">
@@ -384,7 +395,7 @@ function App() {
                                 <label>Author</label>
                                 <input required className="input-control" style={{ width: '100%' }} value={newBill.author} onChange={e => setNewBill({ ...newBill, author: e.target.value })} />
                             </div>
-                            <div className="form-group">
+                            <div className="form-group" style={{ display: 'none' }}>
                                 <label>Committee</label>
                                 <select
                                     className="input-control"
@@ -392,6 +403,7 @@ function App() {
                                     value={newBill.committee}
                                     onChange={e => setNewBill({ ...newBill, committee: e.target.value })}
                                 >
+                                    <option value="">Pending Assignment</option>
                                     {COMMITTEE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                                 </select>
                             </div>
