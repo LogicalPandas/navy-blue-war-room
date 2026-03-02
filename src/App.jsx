@@ -19,6 +19,13 @@ const STATUS_OPTIONS = [
     'Passed House',
 ];
 
+const COMMITTEE_OPTIONS = [
+    'Curriculum and Academic Standards',
+    'General Affairs and Oversight',
+    'Infrastructure and Campus Development',
+    'Student Life and Campus Culture'
+];
+
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');
@@ -27,6 +34,7 @@ function App() {
     // Filters
     const [filterPhase, setFilterPhase] = useState('All');
     const [filterParty, setFilterParty] = useState('All');
+    const [filterCommittee, setFilterCommittee] = useState('All');
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,6 +42,7 @@ function App() {
         id: '',
         title: '',
         author: '',
+        committee: COMMITTEE_OPTIONS[0],
         isNavyBlue: true,
         isAgendaAligned: true,
         isSupermajority: false,
@@ -87,6 +96,17 @@ function App() {
         return score;
     };
 
+    // Calculate Dashboard Metrics
+    const validNavyBills = bills.filter(b => b.isNavyBlue && b.status !== 'Killed Pre-Comm' && b.status !== 'Killed In Comm');
+    const totalNavyBillsAlive = validNavyBills.length;
+
+    const navyBillsByCommittee = validNavyBills.reduce((acc, bill) => {
+        const comm = bill.committee || 'Unassigned';
+        if (!acc[comm]) acc[comm] = 0;
+        acc[comm]++;
+        return acc;
+    }, {});
+
     const handleUpdateBill = async (firestoreId, field, value) => {
         try {
             const billRef = doc(db, 'bills', firestoreId);
@@ -111,7 +131,7 @@ function App() {
             setIsModalOpen(false);
             // Reset form
             setNewBill({
-                id: '', title: '', author: '', isNavyBlue: true, isAgendaAligned: true,
+                id: '', title: '', author: '', committee: COMMITTEE_OPTIONS[0], isNavyBlue: true, isAgendaAligned: true,
                 isSupermajority: false, status: 'Pre-Comm', votesYes: 0, votesUndecided: 0, votesNo: 0
             });
         } catch (error) {
@@ -163,14 +183,31 @@ function App() {
 
     return (
         <div className="app-container">
-            <header className="header">
-                <div>
-                    <h1>Navy Blue War Room</h1>
-                    <div style={{ color: 'var(--slate)' }}>Real-time Legislative Dashboard</div>
+            <header className="header" style={{ flexDirection: 'column', gap: '20px', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                    <div>
+                        <h1>Navy Blue War Room</h1>
+                        <div style={{ color: 'var(--slate)' }}>Real-time Legislative Dashboard</div>
+                    </div>
+                    <div className="score-board">
+                        <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Projected Score</div>
+                        <div className="score-value">{calculateScore() > 0 ? `+${calculateScore()}` : calculateScore()}</div>
+                    </div>
                 </div>
-                <div className="score-board">
-                    <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Projected Score</div>
-                    <div className="score-value">{calculateScore() > 0 ? `+${calculateScore()}` : calculateScore()}</div>
+
+                <div className="metrics-bar" style={{ display: 'flex', gap: '15px', width: '100%', flexWrap: 'wrap' }}>
+                    <div className="metric-card">
+                        <div className="metric-title">Navy Bills Alive</div>
+                        <div className="metric-value" style={{ color: 'var(--accent-blue)' }}>{totalNavyBillsAlive}</div>
+                    </div>
+                    {COMMITTEE_OPTIONS.map(comm => (
+                        <div key={comm} className="metric-card">
+                            <div className="metric-title" title={comm}>
+                                {comm.split(' ').map(w => w[0]).join('')}
+                            </div>
+                            <div className="metric-value">{navyBillsByCommittee[comm] || 0}</div>
+                        </div>
+                    ))}
                 </div>
             </header>
 
@@ -217,6 +254,7 @@ function App() {
                         if (filterPhase !== 'All' && bill.status !== filterPhase) return false;
                         if (filterParty === 'Navy Blue' && !bill.isNavyBlue) return false;
                         if (filterParty === 'Royal Blue' && bill.isNavyBlue) return false;
+                        if (filterCommittee !== 'All' && bill.committee !== filterCommittee) return false;
                         return true;
                     })
                     .map(bill => {
@@ -241,13 +279,16 @@ function App() {
                                         style={{ background: 'none', border: 'none', color: 'var(--slate)', cursor: 'pointer', padding: '0' }}
                                         title="Delete Bill"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 0 0 1-2-2V6m3 0V4a2 0 0 1 2-2h4a2 0 0 1 2 2v2"></path></svg>
                                     </button>
                                 </div>
 
                                 <div>
                                     <div style={{ fontWeight: '600', color: 'var(--white)', marginBottom: '5px' }}>{bill.title}</div>
                                     <div style={{ fontSize: '13px', color: 'var(--slate)' }}>By {bill.author}</div>
+                                    <div style={{ fontSize: '12px', color: 'var(--slate-light)', marginTop: '4px', fontStyle: 'italic' }}>
+                                        {bill.committee || 'Unassigned'}
+                                    </div>
                                 </div>
 
                                 <div className="bill-badges">
@@ -317,6 +358,7 @@ function App() {
                     if (filterPhase !== 'All' && bill.status !== filterPhase) return false;
                     if (filterParty === 'Navy Blue' && !bill.isNavyBlue) return false;
                     if (filterParty === 'Royal Blue' && bill.isNavyBlue) return false;
+                    if (filterCommittee !== 'All' && bill.committee !== filterCommittee) return false;
                     return true;
                 }).length === 0 ? (
                     <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: 'var(--slate)', backgroundColor: 'var(--navy-blue)', borderRadius: '12px' }}>
@@ -341,6 +383,17 @@ function App() {
                             <div className="form-group">
                                 <label>Author</label>
                                 <input required className="input-control" style={{ width: '100%' }} value={newBill.author} onChange={e => setNewBill({ ...newBill, author: e.target.value })} />
+                            </div>
+                            <div className="form-group">
+                                <label>Committee</label>
+                                <select
+                                    className="input-control"
+                                    style={{ width: '100%' }}
+                                    value={newBill.committee}
+                                    onChange={e => setNewBill({ ...newBill, committee: e.target.value })}
+                                >
+                                    {COMMITTEE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                </select>
                             </div>
                             <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
                                 <label className="checkbox-label">

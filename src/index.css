@@ -26,7 +26,12 @@ body {
   box-sizing: border-box;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--white);
   margin: 0 0 10px 0;
 }
@@ -44,7 +49,7 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--navy-blue);
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
   text-align: center;
   border: 1px solid var(--navy-lighter);
 }
@@ -103,12 +108,38 @@ h1, h2, h3, h4, h5, h6 {
   padding: 15px 25px;
   border-radius: 12px;
   text-align: center;
+  min-width: 140px;
 }
 
 .score-value {
   font-size: 32px;
   font-weight: 700;
   color: var(--accent-blue);
+}
+
+.metric-card {
+  background-color: var(--navy-blue);
+  border: 1px solid var(--navy-lighter);
+  padding: 12px 20px;
+  border-radius: 10px;
+  text-align: center;
+  flex: 1;
+  min-width: 80px;
+}
+
+.metric-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--slate);
+  margin-bottom: 5px;
+  white-space: nowrap;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--white);
 }
 
 .dashboard-controls {
@@ -145,7 +176,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .bill-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px -15px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.5);
 }
 
 .bill-card.veto-warning {
@@ -174,10 +205,29 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.5px;
 }
 
-.badge-navy { background-color: rgba(100, 255, 218, 0.1); color: var(--accent-blue); border: 1px solid rgba(100,255,218,0.2); }
-.badge-royal { background-color: rgba(255, 59, 48, 0.1); color: var(--warning-red); border: 1px solid rgba(255,59,48,0.2); }
-.badge-agenda { background-color: rgba(52, 199, 89, 0.1); color: var(--success-green); border: 1px solid rgba(52,199,89,0.2); }
-.badge-super { background-color: rgba(168, 178, 209, 0.1); color: var(--slate-light); border: 1px solid rgba(168,178,209,0.2); }
+.badge-navy {
+  background-color: rgba(100, 255, 218, 0.1);
+  color: var(--accent-blue);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+}
+
+.badge-royal {
+  background-color: rgba(255, 59, 48, 0.1);
+  color: var(--warning-red);
+  border: 1px solid rgba(255, 59, 48, 0.2);
+}
+
+.badge-agenda {
+  background-color: rgba(52, 199, 89, 0.1);
+  color: var(--success-green);
+  border: 1px solid rgba(52, 199, 89, 0.2);
+}
+
+.badge-super {
+  background-color: rgba(168, 178, 209, 0.1);
+  color: var(--slate-light);
+  border: 1px solid rgba(168, 178, 209, 0.2);
+}
 
 .veto-banner {
   background-color: var(--warning-red);
@@ -301,7 +351,10 @@ select:focus {
 /* Modal styles for adding new bills */
 .modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(6, 17, 33, 0.8);
   display: flex;
   align-items: center;
