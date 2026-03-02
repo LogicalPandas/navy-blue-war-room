@@ -416,10 +416,15 @@ function App() {
                                     <input type="checkbox" checked={newBill.isAgendaAligned} onChange={e => setNewBill({ ...newBill, isAgendaAligned: e.target.checked })} />
                                     Is Agenda Aligned? (+2 Bonus)
                                 </label>
-                                <label className="checkbox-label">
-                                    <input type="checkbox" checked={newBill.isSupermajority} onChange={e => setNewBill({ ...newBill, isSupermajority: e.target.checked })} />
-                                    Requires Supermajority? (66%)
-                                </label>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <label className="checkbox-label">
+                                        <input type="checkbox" checked={newBill.isSupermajority} onChange={e => setNewBill({ ...newBill, isSupermajority: e.target.checked })} />
+                                        Requires Supermajority? (66%)
+                                    </label>
+                                    <span style={{ fontSize: '11px', color: 'var(--slate)', marginLeft: '24px', fontStyle: 'italic' }}>
+                                        Bills that deal with classes/curriculum or parking require a supermajority
+                                    </span>
+                                </div>
                             </div>
                             <div className="modal-actions">
                                 <button type="button" className="btn-primary" style={{ borderColor: 'var(--slate)', color: 'var(--slate)' }} onClick={() => setIsModalOpen(false)}>Cancel</button>
