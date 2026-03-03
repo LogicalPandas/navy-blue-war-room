@@ -188,11 +188,11 @@ function App() {
 
                 <div className="metrics-bar" style={{ display: 'flex', gap: '15px', width: '100%', flexWrap: 'wrap' }}>
                     <div className="metric-card">
-                        <div className="metric-title">Navy Bills Alive</div>
+                        <div className="metric-title">Bills Alive</div>
                         <div className="metric-value" style={{ color: 'var(--accent-blue)' }}>{totalNavyBillsAlive}</div>
                     </div>
                     <div className="metric-card">
-                        <div className="metric-title">Navy Passed House</div>
+                        <div className="metric-title">Passed House</div>
                         <div className="metric-value" style={{ color: 'var(--success-green)' }}>{totalNavyBillsPassed}</div>
                     </div>
                     {COMMITTEE_OPTIONS.map(comm => (
@@ -205,16 +205,15 @@ function App() {
                     ))}
                 </div>
             </header>
-
-            <div className="dashboard-controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <button className="add-bill-btn" onClick={() => setIsModalOpen(true)}>
+            <div className="dashboard-controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+                <button className="add-bill-btn" onClick={() => setIsModalOpen(true)} style={{ whiteSpace: 'nowrap' }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    Add New Bill
+                    New Bill
                 </button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div className="filter-controls" style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <label style={{ fontSize: '14px', fontWeight: '500', color: 'var(--slate)' }}>Party:</label>
                         <select
@@ -385,63 +384,65 @@ function App() {
                 ) : null}
             </div>
 
-            {isModalOpen && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h2 style={{ marginBottom: '20px' }}>Add New Bill</h2>
-                        <form onSubmit={handleAddBill}>
-                            <div className="form-group">
-                                <label>Bill ID (e.g., HB 101)</label>
-                                <input required className="input-control" style={{ width: '100%' }} value={newBill.id} onChange={e => setNewBill({ ...newBill, id: e.target.value })} />
-                            </div>
-                            <div className="form-group">
-                                <label>Title</label>
-                                <input required className="input-control" style={{ width: '100%' }} value={newBill.title} onChange={e => setNewBill({ ...newBill, title: e.target.value })} />
-                            </div>
-                            <div className="form-group">
-                                <label>Author</label>
-                                <input required className="input-control" style={{ width: '100%' }} value={newBill.author} onChange={e => setNewBill({ ...newBill, author: e.target.value })} />
-                            </div>
-                            <div className="form-group" style={{ display: 'none' }}>
-                                <label>Committee</label>
-                                <select
-                                    className="input-control"
-                                    style={{ width: '100%' }}
-                                    value={newBill.committee}
-                                    onChange={e => setNewBill({ ...newBill, committee: e.target.value })}
-                                >
-                                    <option value="">Pending Assignment</option>
-                                    {COMMITTEE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                                </select>
-                            </div>
-                            <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
-                                <label className="checkbox-label">
-                                    <input type="checkbox" checked={newBill.isNavyBlue} onChange={e => setNewBill({ ...newBill, isNavyBlue: e.target.checked })} />
-                                    Is Navy Blue Bill? (Our Party)
-                                </label>
-                                <label className="checkbox-label">
-                                    <input type="checkbox" checked={newBill.isAgendaAligned} onChange={e => setNewBill({ ...newBill, isAgendaAligned: e.target.checked })} />
-                                    Is Agenda Aligned? (+2 Bonus)
-                                </label>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                    <label className="checkbox-label">
-                                        <input type="checkbox" checked={newBill.isSupermajority} onChange={e => setNewBill({ ...newBill, isSupermajority: e.target.checked })} />
-                                        Requires Supermajority? (66%)
-                                    </label>
-                                    <span style={{ fontSize: '11px', color: 'var(--slate)', marginLeft: '24px', fontStyle: 'italic' }}>
-                                        Bills that deal with classes/curriculum or parking require a supermajority
-                                    </span>
+            {
+                isModalOpen && (
+                    <div className="modal-overlay">
+                        <div className="modal-content">
+                            <h2 style={{ marginBottom: '20px' }}>Add New Bill</h2>
+                            <form onSubmit={handleAddBill}>
+                                <div className="form-group">
+                                    <label>Bill ID (e.g., HB 101)</label>
+                                    <input required className="input-control" style={{ width: '100%' }} value={newBill.id} onChange={e => setNewBill({ ...newBill, id: e.target.value })} />
                                 </div>
-                            </div>
-                            <div className="modal-actions">
-                                <button type="button" className="btn-primary" style={{ borderColor: 'var(--slate)', color: 'var(--slate)' }} onClick={() => setIsModalOpen(false)}>Cancel</button>
-                                <button type="submit" className="add-bill-btn" style={{ margin: '0' }}>Save Bill</button>
-                            </div>
-                        </form>
+                                <div className="form-group">
+                                    <label>Title</label>
+                                    <input required className="input-control" style={{ width: '100%' }} value={newBill.title} onChange={e => setNewBill({ ...newBill, title: e.target.value })} />
+                                </div>
+                                <div className="form-group">
+                                    <label>Author</label>
+                                    <input required className="input-control" style={{ width: '100%' }} value={newBill.author} onChange={e => setNewBill({ ...newBill, author: e.target.value })} />
+                                </div>
+                                <div className="form-group" style={{ display: 'none' }}>
+                                    <label>Committee</label>
+                                    <select
+                                        className="input-control"
+                                        style={{ width: '100%' }}
+                                        value={newBill.committee}
+                                        onChange={e => setNewBill({ ...newBill, committee: e.target.value })}
+                                    >
+                                        <option value="">Pending Assignment</option>
+                                        {COMMITTEE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                    </select>
+                                </div>
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
+                                    <label className="checkbox-label">
+                                        <input type="checkbox" checked={newBill.isNavyBlue} onChange={e => setNewBill({ ...newBill, isNavyBlue: e.target.checked })} />
+                                        Is Navy Blue Bill? (Our Party)
+                                    </label>
+                                    <label className="checkbox-label">
+                                        <input type="checkbox" checked={newBill.isAgendaAligned} onChange={e => setNewBill({ ...newBill, isAgendaAligned: e.target.checked })} />
+                                        Is Agenda Aligned? (+2 Bonus)
+                                    </label>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <label className="checkbox-label">
+                                            <input type="checkbox" checked={newBill.isSupermajority} onChange={e => setNewBill({ ...newBill, isSupermajority: e.target.checked })} />
+                                            Requires Supermajority? (66%)
+                                        </label>
+                                        <span style={{ fontSize: '11px', color: 'var(--slate)', marginLeft: '24px', fontStyle: 'italic' }}>
+                                            Bills that deal with classes/curriculum or parking require a supermajority
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="modal-actions">
+                                    <button type="button" className="btn-primary" style={{ borderColor: 'var(--slate)', color: 'var(--slate)' }} onClick={() => setIsModalOpen(false)}>Cancel</button>
+                                    <button type="submit" className="add-bill-btn" style={{ margin: '0' }}>Save Bill</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }
 
