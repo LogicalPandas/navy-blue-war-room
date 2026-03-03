@@ -16,7 +16,9 @@ const STATUS_OPTIONS = [
     'In Committee',
     'Killed in Committee',
     'In House',
+    'Killed In House',
     'Passed House',
+    'Signed into Law'
 ];
 
 const COMMITTEE_OPTIONS = [
@@ -82,18 +84,6 @@ function App() {
         } else {
             alert('Incorrect Password');
         }
-    };
-
-    const calculateScore = () => {
-        let score = 0;
-        bills.forEach(bill => {
-            if (bill.status === 'Passed House') {
-                if (bill.isNavyBlue) score += 10;
-                if (bill.isAgendaAligned) score += 2;
-                if (!bill.isNavyBlue && !bill.isAgendaAligned) score -= 5;
-            }
-        });
-        return score;
     };
 
     // Calculate Dashboard Metrics
@@ -191,8 +181,8 @@ function App() {
                         <div style={{ color: 'var(--slate)' }}>Real-time Legislative Dashboard</div>
                     </div>
                     <div className="score-board">
-                        <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Projected Score</div>
-                        <div className="score-value">{calculateScore() > 0 ? `+${calculateScore()}` : calculateScore()}</div>
+                        <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Passed Bills</div>
+                        <div className="score-value">{bills.filter(b => b.status === 'Signed into Law').length}</div>
                     </div>
                 </div>
 
@@ -250,6 +240,18 @@ function App() {
                             {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
                     </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <label style={{ fontSize: '14px', fontWeight: '500', color: 'var(--slate)' }}>Committee:</label>
+                        <select
+                            className="input-control"
+                            style={{ width: 'auto', padding: '6px 10px' }}
+                            value={filterCommittee}
+                            onChange={e => setFilterCommittee(e.target.value)}
+                        >
+                            <option value="All">All Committees</option>
+                            {COMMITTEE_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -302,7 +304,7 @@ function App() {
                                         </select>
                                     ) : (
                                         <div style={{ fontSize: '12px', color: 'var(--slate-light)', marginTop: '4px', fontStyle: 'italic' }}>
-                                            {(bill.status === 'In House' || bill.status === 'Passed House') ? '' : (bill.committee || 'Pending Committee')}
+                                            {(bill.status === 'In House' || bill.status === 'Killed In House' || bill.status === 'Passed House' || bill.status === 'Signed into Law') ? '' : (bill.committee || 'Pending Committee')}
                                         </div>
                                     )}
                                 </div>
