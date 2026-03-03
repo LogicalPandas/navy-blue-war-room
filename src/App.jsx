@@ -182,7 +182,7 @@ function App() {
                     </div>
                     <div className="score-board">
                         <div style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px' }}>Passed Bills</div>
-                        <div className="score-value">{bills.filter(b => b.status === 'Signed into Law').length}</div>
+                        <div className="score-value">{bills.filter(b => b.status === 'Signed into Law' && b.isNavyBlue).length}</div>
                     </div>
                 </div>
 
