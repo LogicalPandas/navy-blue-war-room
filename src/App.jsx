@@ -40,6 +40,8 @@ function App() {
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+    const [bulkText, setBulkText] = useState('');
     const [newBill, setNewBill] = useState({
         id: '',
         title: '',
@@ -131,6 +133,43 @@ function App() {
         }
     };
 
+    const handleBulkAdd = async (e) => {
+        e.preventDefault();
+        const records = bulkText.split('\n').map(r => r.trim()).filter(Boolean);
+        let count = 0;
+        for (let record of records) {
+            const parts = record.split('\t');
+            if (parts.length < 3) continue;
+
+            const id = parts[0]?.trim() || '';
+            const title = parts[1]?.trim() || '';
+            const author = parts[2]?.trim() || '';
+            const navyBlue = parts[3] ? parts[3].trim().toLowerCase() === 'true' : true;
+            const agenda = parts[4] ? parts[4].trim().toLowerCase() === 'true' : true;
+            const supermaj = parts[5] ? parts[5].trim().toLowerCase() === 'true' : false;
+
+            try {
+                await addDoc(collection(db, 'bills'), {
+                    id, title, author,
+                    committee: '',
+                    isNavyBlue: navyBlue,
+                    isAgendaAligned: agenda,
+                    isSupermajority: supermaj,
+                    status: 'Pre-Comm',
+                    votesYes: 0,
+                    votesUndecided: 0,
+                    votesNo: 0
+                });
+                count++;
+            } catch (error) {
+                console.error("Error adding document in bulk: ", error);
+            }
+        }
+        alert(`Successfully imported ${count} bills.`);
+        setIsBulkModalOpen(false);
+        setBulkText('');
+    };
+
     const handleDeleteBill = async (firestoreId) => {
         if (window.confirm("Are you sure you want to delete this bill?")) {
             try {
@@ -206,13 +245,23 @@ function App() {
                 </div>
             </header>
             <div className="dashboard-controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
-                <button className="add-bill-btn" onClick={() => setIsModalOpen(true)} style={{ whiteSpace: 'nowrap' }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    New Bill
-                </button>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <button className="add-bill-btn" onClick={() => setIsModalOpen(true)} style={{ whiteSpace: 'nowrap' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        New Bill
+                    </button>
+                    <button className="add-bill-btn" onClick={() => setIsBulkModalOpen(true)} style={{ whiteSpace: 'nowrap', backgroundColor: 'var(--slate)', borderColor: 'var(--slate)' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Bulk Import
+                    </button>
+                </div>
                 <div className="filter-controls" style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <label style={{ fontSize: '14px', fontWeight: '500', color: 'var(--slate)' }}>Party:</label>
@@ -436,6 +485,37 @@ function App() {
                                 <div className="modal-actions">
                                     <button type="button" className="btn-primary" style={{ borderColor: 'var(--slate)', color: 'var(--slate)' }} onClick={() => setIsModalOpen(false)}>Cancel</button>
                                     <button type="submit" className="add-bill-btn" style={{ margin: '0' }}>Save Bill</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )
+            }
+
+            {
+                isBulkModalOpen && (
+                    <div className="modal-overlay">
+                        <div className="modal-content" style={{ maxWidth: '600px' }}>
+                            <h2 style={{ marginBottom: '10px' }}>Bulk Import Bills</h2>
+                            <p style={{ color: 'var(--slate)', fontSize: '14px', marginBottom: '20px' }}>
+                                Paste data from Excel or Google Sheets. The columns must be in this exact order:<br /><br />
+                                <strong>ID | Title | Author | IsNavyBlue | IsAgendaAligned | IsSupermajority</strong><br /><br />
+                                <em>(Boolean columns can be 'true' or 'false'. They default to true, true, and false respectively if left blank.)</em>
+                            </p>
+                            <form onSubmit={handleBulkAdd}>
+                                <div className="form-group">
+                                    <textarea
+                                        className="input-control"
+                                        style={{ width: '100%', height: '200px', resize: 'vertical', fontFamily: 'monospace' }}
+                                        placeholder="HB 101&#9;Education Reform&#9;Smith&#9;true&#9;true&#9;false"
+                                        value={bulkText}
+                                        onChange={e => setBulkText(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="modal-actions" style={{ marginTop: '20px' }}>
+                                    <button type="button" className="btn-primary" style={{ borderColor: 'var(--slate)', color: 'var(--slate)' }} onClick={() => setIsBulkModalOpen(false)}>Cancel</button>
+                                    <button type="submit" className="add-bill-btn" style={{ margin: '0' }}>Import Bills</button>
                                 </div>
                             </form>
                         </div>
