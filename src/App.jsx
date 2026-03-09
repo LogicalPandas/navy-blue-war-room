@@ -34,6 +34,7 @@ function App() {
     const [bills, setBills] = useState([]);
 
     // Filters
+    const [searchTerm, setSearchTerm] = useState('');
     const [filterPhase, setFilterPhase] = useState('All');
     const [filterParty, setFilterParty] = useState('All');
     const [filterCommittee, setFilterCommittee] = useState('All');
@@ -293,6 +294,19 @@ function App() {
                     </button>
                 </div>
                 <div className="filter-controls" style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexGrow: 1, minWidth: '200px' }}>
+                        <div style={{ position: 'relative', width: '100%' }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--slate)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <input
+                                type="text"
+                                className="input-control"
+                                style={{ width: '100%', paddingLeft: '35px', paddingRight: '10px' }}
+                                placeholder="Search ID, title, or author..."
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                    </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <label style={{ fontSize: '14px', fontWeight: '500', color: 'var(--slate)' }}>Party:</label>
                         <select
@@ -336,6 +350,15 @@ function App() {
             <div className="bills-grid">
                 {bills
                     .filter(bill => {
+                        // Global Search
+                        if (searchTerm) {
+                            const term = searchTerm.toLowerCase();
+                            const matchesId = bill.id?.toLowerCase().includes(term);
+                            const matchesTitle = bill.title?.toLowerCase().includes(term);
+                            const matchesAuthor = bill.author?.toLowerCase().includes(term);
+                            if (!matchesId && !matchesTitle && !matchesAuthor) return false;
+                        }
+
                         if (filterPhase !== 'All' && bill.status !== filterPhase) return false;
                         if (filterParty === 'Navy Blue' && !bill.isNavyBlue) return false;
                         if (filterParty === 'Royal Blue' && bill.isNavyBlue) return false;
