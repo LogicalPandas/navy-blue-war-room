@@ -42,6 +42,7 @@ function App() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [bulkText, setBulkText] = useState('');
+    const [editingBill, setEditingBill] = useState(null);
     const [newBill, setNewBill] = useState({
         id: '',
         title: '',
@@ -178,6 +179,25 @@ function App() {
         alert(`Successfully imported ${count} bills.`);
         setIsBulkModalOpen(false);
         setBulkText('');
+    };
+
+    const handleEditBill = async (e) => {
+        e.preventDefault();
+        try {
+            const billRef = doc(db, 'bills', editingBill._firestoreId);
+            await updateDoc(billRef, {
+                id: editingBill.id,
+                title: editingBill.title,
+                author: editingBill.author,
+                isNavyBlue: editingBill.isNavyBlue,
+                isAgendaAligned: editingBill.isAgendaAligned,
+                isSupermajority: editingBill.isSupermajority
+            });
+            setEditingBill(null);
+        } catch (error) {
+            console.error("Error updating document: ", error);
+            alert("Error updating bill.");
+        }
     };
 
     const handleDeleteBill = async (firestoreId) => {
@@ -339,13 +359,22 @@ function App() {
 
                                 <div className="card-header">
                                     <h3 style={{ margin: '0' }}>{bill.id}</h3>
-                                    <button
-                                        onClick={() => handleDeleteBill(bill._firestoreId)}
-                                        style={{ background: 'none', border: 'none', color: 'var(--slate)', cursor: 'pointer', padding: '0' }}
-                                        title="Delete Bill"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                    </button>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <button
+                                            onClick={() => setEditingBill({ ...bill })}
+                                            style={{ background: 'none', border: 'none', color: 'var(--slate)', cursor: 'pointer', padding: '0' }}
+                                            title="Edit Bill"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteBill(bill._firestoreId)}
+                                            style={{ background: 'none', border: 'none', color: 'var(--slate)', cursor: 'pointer', padding: '0' }}
+                                            title="Delete Bill"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -495,6 +524,53 @@ function App() {
                                 <div className="modal-actions">
                                     <button type="button" className="btn-primary" style={{ borderColor: 'var(--slate)', color: 'var(--slate)' }} onClick={() => setIsModalOpen(false)}>Cancel</button>
                                     <button type="submit" className="add-bill-btn" style={{ margin: '0' }}>Save Bill</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )
+            }
+
+            {
+                editingBill && (
+                    <div className="modal-overlay">
+                        <div className="modal-content">
+                            <h2 style={{ marginBottom: '20px' }}>Edit Bill</h2>
+                            <form onSubmit={handleEditBill}>
+                                <div className="form-group">
+                                    <label>Bill ID (e.g., HB 101)</label>
+                                    <input required className="input-control" style={{ width: '100%' }} value={editingBill.id} onChange={e => setEditingBill({ ...editingBill, id: e.target.value })} />
+                                </div>
+                                <div className="form-group">
+                                    <label>Title</label>
+                                    <input required className="input-control" style={{ width: '100%' }} value={editingBill.title} onChange={e => setEditingBill({ ...editingBill, title: e.target.value })} />
+                                </div>
+                                <div className="form-group">
+                                    <label>Author</label>
+                                    <input required className="input-control" style={{ width: '100%' }} value={editingBill.author} onChange={e => setEditingBill({ ...editingBill, author: e.target.value })} />
+                                </div>
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
+                                    <label className="checkbox-label">
+                                        <input type="checkbox" checked={editingBill.isNavyBlue} onChange={e => setEditingBill({ ...editingBill, isNavyBlue: e.target.checked })} />
+                                        Is Navy Blue Bill? (Our Party)
+                                    </label>
+                                    <label className="checkbox-label">
+                                        <input type="checkbox" checked={editingBill.isAgendaAligned} onChange={e => setEditingBill({ ...editingBill, isAgendaAligned: e.target.checked })} />
+                                        Is Agenda Aligned? (+2 Bonus)
+                                    </label>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        <label className="checkbox-label">
+                                            <input type="checkbox" checked={editingBill.isSupermajority} onChange={e => setEditingBill({ ...editingBill, isSupermajority: e.target.checked })} />
+                                            Requires Supermajority? (66%)
+                                        </label>
+                                        <span style={{ fontSize: '11px', color: 'var(--slate)', marginLeft: '24px', fontStyle: 'italic' }}>
+                                            Bills that deal with classes/curriculum or parking require a supermajority
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="modal-actions">
+                                    <button type="button" className="btn-primary" style={{ borderColor: 'var(--slate)', color: 'var(--slate)' }} onClick={() => setEditingBill(null)}>Cancel</button>
+                                    <button type="submit" className="add-bill-btn" style={{ margin: '0' }}>Save Changes</button>
                                 </div>
                             </form>
                         </div>
