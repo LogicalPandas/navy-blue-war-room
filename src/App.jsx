@@ -148,14 +148,24 @@ function App() {
             const agenda = parts[4] ? parts[4].trim().toLowerCase() === 'true' : true;
             const supermaj = parts[5] ? parts[5].trim().toLowerCase() === 'true' : false;
 
+            let status = parts[6]?.trim() || 'Pre-Comm';
+            if (!STATUS_OPTIONS.includes(status)) {
+                status = 'Pre-Comm';
+            }
+
+            let committee = parts[7]?.trim() || '';
+            if (committee && !COMMITTEE_OPTIONS.includes(committee)) {
+                committee = '';
+            }
+
             try {
                 await addDoc(collection(db, 'bills'), {
                     id, title, author,
-                    committee: '',
+                    committee,
                     isNavyBlue: navyBlue,
                     isAgendaAligned: agenda,
                     isSupermajority: supermaj,
-                    status: 'Pre-Comm',
+                    status,
                     votesYes: 0,
                     votesUndecided: 0,
                     votesNo: 0
@@ -499,15 +509,15 @@ function App() {
                             <h2 style={{ marginBottom: '10px' }}>Bulk Import Bills</h2>
                             <p style={{ color: 'var(--slate)', fontSize: '14px', marginBottom: '20px' }}>
                                 Paste data from Excel or Google Sheets. The columns must be in this exact order:<br /><br />
-                                <strong>ID | Title | Author | IsNavyBlue | IsAgendaAligned | IsSupermajority</strong><br /><br />
-                                <em>(Boolean columns can be 'true' or 'false'. They default to true, true, and false respectively if left blank.)</em>
+                                <strong>ID | Title | Author | IsNavyBlue | IsAgendaAligned | IsSupermajority | Status | Committee</strong><br /><br />
+                                <em>(Boolean columns can be 'true' or 'false'. Status must exactly match a valid phase or it defaults to 'Pre-Comm'. Committee must exactly match a valid committee if provided.)</em>
                             </p>
                             <form onSubmit={handleBulkAdd}>
                                 <div className="form-group">
                                     <textarea
                                         className="input-control"
-                                        style={{ width: '100%', height: '200px', resize: 'vertical', fontFamily: 'monospace' }}
-                                        placeholder="HB 101&#9;Education Reform&#9;Smith&#9;true&#9;true&#9;false"
+                                        style={{ width: '100%', height: '200px', resize: 'vertical', fontFamily: 'monospace', whiteSpace: 'pre' }}
+                                        placeholder="HB 101&#9;Education Reform&#9;Smith&#9;true&#9;true&#9;false&#9;Pre-Comm&#9;General Affairs and Oversight"
                                         value={bulkText}
                                         onChange={e => setBulkText(e.target.value)}
                                         required
