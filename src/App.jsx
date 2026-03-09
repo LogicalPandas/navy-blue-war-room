@@ -342,6 +342,7 @@ function App() {
                         if (filterCommittee !== 'All' && bill.committee !== filterCommittee) return false;
                         return true;
                     })
+                    .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }))
                     .map(bill => {
                         const totalVotesCast = bill.votesYes + bill.votesNo + bill.votesUndecided;
                         const requiredFraction = bill.isSupermajority ? 0.66 : 0.51;
