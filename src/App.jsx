@@ -343,19 +343,13 @@ function App() {
                         return true;
                     })
                     .map(bill => {
-                        const isVetoWarning = !bill.isNavyBlue && !bill.isAgendaAligned && (bill.status === 'In Committee' || bill.status === 'In House');
                         const totalVotesCast = bill.votesYes + bill.votesNo + bill.votesUndecided;
                         const requiredFraction = bill.isSupermajority ? 0.66 : 0.51;
                         const requiredVotes = Math.ceil(TOTAL_VOTERS * requiredFraction);
                         const hasMajority = bill.votesYes >= requiredVotes;
 
                         return (
-                            <div key={bill._firestoreId} className={`bill-card ${!bill.isNavyBlue ? 'royal-blue-card' : ''} ${isVetoWarning ? 'veto-warning' : ''}`}>
-                                {isVetoWarning && (
-                                    <div className="veto-banner">
-                                        🚨 STOP THIS BILL 🚨
-                                    </div>
-                                )}
+                            <div key={bill._firestoreId} className={`bill-card ${!bill.isNavyBlue ? 'royal-blue-card' : ''}`}>
 
                                 <div className="card-header">
                                     <h3 style={{ margin: '0' }}>{bill.id}</h3>
