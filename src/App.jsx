@@ -14,6 +14,7 @@ const TOTAL_VOTERS = 29; // Hardcoded total body size
 const STATUS_OPTIONS = [
     'Pre-Comm',
     'In Committee',
+    'In Committee (Tabled)',
     'Killed in Committee',
     'In House',
     'Killed In House',
@@ -398,7 +399,7 @@ function App() {
                                 <div>
                                     <div style={{ fontWeight: '600', color: 'var(--white)', marginBottom: '5px' }}>{bill.title}</div>
                                     <div style={{ fontSize: '13px', color: 'var(--slate)' }}>By {bill.author}</div>
-                                    {bill.status === 'In Committee' || bill.status === 'Killed in Committee' ? (
+                                    {bill.status === 'In Committee' || bill.status === 'In Committee (Tabled)' || bill.status === 'Killed in Committee' ? (
                                         <select
                                             style={{ backgroundColor: 'transparent', border: '1px solid var(--navy-lighter)', color: 'var(--slate-light)', fontSize: '12px', padding: '2px 4px', marginTop: '4px', width: '100%' }}
                                             value={bill.committee || ''}
